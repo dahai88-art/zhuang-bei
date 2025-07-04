@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>装备管理系统</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config={theme:{extend:{colors:{primary:'#2563eb',secondary:'#dc2626'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+    <style>
+        :where([class^="ri-"])::before { content: "\f3c2"; }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f8fafc;
+        }
+        .page {
+            display: none;
+            padding-top: 60px;
+            padding-bottom: 70px;
+            min-height: 762px;
+        }
+        .active-page {
+            display: block;
+        }
+        .active-tab {
+            color: #2563eb;
+        }
+        .offline-badge {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            background-color: #fef3c7;
+            color: #92400e;
+            text-align: center;
+            padding: 4px;
+            font-size: 12px;
+            z-index: 40;
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="relative w-[375px] mx-auto overflow-hidden bg-white shadow-xl">
+        <!-- 顶部导航栏 -->
+        <div id="navbar" class="fixed top-0 left-0 right-0 h-14 bg-white shadow-sm flex items-center justify-between px-4 z-50 w-[375px] mx-auto">
+            <div class="flex items-center">
+                <div class="font-['Pacifico'] text-primary text-xl">logo</div>
+            </div>
+            <h1 id="page-title" class="text-lg font-medium">入库管理</h1>
+            <div class="w-8 h-8 flex items-center justify-center">
+                <i class="ri-notification-3-line ri-lg"></i>
+            </div>
+        </div>
+
+        <!-- 离线模式提示 -->
+        <div id="offline-badge" class="offline-badge">
+            <span class="flex items-center justify-center">
+                <i class="ri-wifi-off-line mr-1"></i> 离线模式中，数据将在网络恢复后自动同步
+            </span>
+        </div>
+
+        <!-- 入库管理页面 -->
+        <div id="page-warehouse" class="page active-page px-4">
+            <!-- 搜索栏 -->
+            <div class="mt-4 mb-6 relative">
+                <div class="relative">
+                    <input type="text" placeholder="搜索装备名称、型号或编号" class="w-full h-10 pl-10 pr-4 rounded-button bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    <div class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 flex items-center justify-center">
+                        <i class="ri-search-line text-gray-500"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分类筛选 -->
+            <div class="flex space-x-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
+                <button class="px-3 py-1.5 bg-primary text-white rounded-full text-sm whitespace-nowrap">全部</button>
+                <button class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-sm whitespace-nowrap">防护装备</button>
+                <button class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-sm whitespace-nowrap">救援工具</button>
+                <button class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-sm whitespace-nowrap">通信设备</button>
+                <button class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-sm whitespace-nowrap">医疗器械</button>
+            </div>
+
+            <!-- 装备列表 -->
+            <div class="space-y-4 pb-4">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden cursor-pointer">
+                    <div class="flex p-3">
+                        <div class="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                            <img src="https://readdy.ai/api/search-image?query=firefighter%20helmet%2C%20professional%20safety%20equipment%2C%20isolated%20on%20light%20gray%20background%2C%20high%20quality%20product%20photography&width=200&height=200&seq=1&orientation=squarish" alt="消防头盔" class="w-full h-full object-cover">
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <div class="flex justify-between">
+                                <h3 class="font-medium">消防头盔</h3>
+                                <span class="text-xs px-2 py-0.5 bg-blue-100 text-primary rounded-full">待入库</span>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">型号：FH-2025A</p>
+                            <p class="text-xs text-gray-400 mt-0.5">规格：标准型 / 耐热 1000°C</p>
+                            <button class="mt-2 px-3 py-1 bg-primary text-white text-sm rounded-button flex items-center">
+                                <i class="ri-link-m ri-sm mr-1"></i>绑定 RFID
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden cursor-pointer">
+                    <div class="flex p-3">
+                        <div class="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                            <img src="https://readdy.ai/api/search-image?query=oxygen%20breathing%20apparatus%2C%20professional%20firefighting%20equipment%2C%20isolated%20on%20light%20gray%20background%2C%20high%20quality%20product%20photography&width=200&height=200&seq=2&orientation=squarish" alt="氧气呼吸器" class="w-full h-full object-cover">
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <div class="flex justify-between">
+                                <h3 class="font-medium">氧气呼吸器</h3>
+                                <span class="text-xs px-2 py-0.5 bg-blue-100 text-primary rounded-full">待入库</span>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">型号：OBA-350</p>
+                            <p class="text-xs text-gray-400 mt-0.5">规格：6L / 使用时长 45min</p>
+                            <button class="mt-2 px-3 py-1 bg-primary text-white text-sm rounded-button flex items-center">
+                                <i class="ri-link-m ri-sm mr-1"></i>绑定 RFID
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden cursor-pointer">
+                    <div class="flex p-3">
+                        <div class="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                            <img src="https://readdy.ai/api/search-image?query=thermal%20imaging%20camera%2C%20professional%20rescue%20equipment%2C%20isolated%20on%20light%20gray%20background%2C%20high%20quality%20product%20photography&width=200&height=200&seq=3&orientation=squarish" alt="热成像仪" class="w-full h-full object-cover">
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <div class="flex justify-between">
+                                <h3 class="font-medium">热成像仪</h3>
+                                <span class="text-xs px-2 py-0.5 bg-blue-100 text-primary rounded-full">待入库</span>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">型号：TIC-8000</p>
+                            <p class="text-xs text-gray-400 mt-0.5">规格：高精度 / 续航 4h</p>
+                            <button class="mt-2 px-3 py-1 bg-primary text-white text-sm rounded-button flex items-center">
+                                <i class="ri-link-m ri-sm mr-1"></i>绑定 RFID
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden cursor-pointer">
+                    <div class="flex p-3">
+                        <div class="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                            <img src="https://readdy.ai/api/search-image?query=hydraulic%20rescue%20tool%2C%20professional%20emergency%20equipment%2C%20isolated%20on%20light%20gray%20background%2C%20high%20quality%20product%20photography&width=200&height=200&seq=4&orientation=squarish" alt="液压破拆工具" class="w-full h-full object-cover">
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <div class="flex justify-between">
+                                <h3 class="font-medium">液压破拆工具</h3>
+                                <span class="text-xs px-2 py-0.5 bg-blue-100 text-primary rounded-full">待入库</span>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">型号：HRT-2025</p>
+                            <p class="text-xs text-gray-400 mt-0.5">规格：便携式 / 剪切力 80kN</p>
+                            <button class="mt-2 px-3 py-1 bg-primary text-white text-sm rounded-button flex items-center">
+                                <i class="ri-link-m ri-sm mr-1"></i>绑定 RFID
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 库房盘点页面 -->
+        <div id="page-inventory" class="page px-4">
+            <!-- 盘点数据概览 -->
+            <div class="bg-white rounded-lg shadow-sm p-4 mt-4">
+                <h2 class="text-base font-medium mb-3">盘点概况</h2>
+                <div class="flex">
+                    <div class="flex-1">
+                        <div id="inventory-chart" class="h-28"></div>
+                    </div>
+                    <div class="flex-1 flex flex-col justify-center">
+                        <div class="mb-2">
+                            <p class="text-sm text-gray-500">总装备数</p>
+                            <p class="text-xl font-medium">248 件</p>
+                        </div>
+                        <div class="flex space-x-4">
+                            <div>
+                                <p class="text-xs text-gray-500">已盘</p>
+                                <p class="text-sm font-medium text-green-600">215 件</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">未盘</p>
+                                <p class="text-sm font-medium text-gray-600">33 件</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">异常</p>
+                                <p class="text-sm font-medium text-secondary">5 件</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 盘点操作区 -->
+            <div class="mt-4 flex justify-between items-center">
+                <h2 class="text-base font-medium">盘点列表</h2>
+                <button class="flex items-center text-primary text-sm">
+                    <i class="ri-refresh-line mr-1"></i>刷新数据
+                </button>
+            </div>
+
+            <!-- 分类筛选 -->
+            <div class="flex space-x-2 overflow-x-auto py-3 scrollbar-hide">
+                <button class="px-3 py-1.5 bg-primary text-white rounded-full text-sm whitespace-nowrap">全部</button>
+                <button class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-sm whitespace-nowrap">正常</button>
+                <button class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-sm whitespace-nowrap">借出</button>
+                <button class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-sm whitespace-nowrap">异常</button>
+                <button class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-sm whitespace-nowrap">报废</button>
+            </div>
+
+            <!-- 盘点列表 -->
+            <div class="space-y-3 pb-4">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-3 cursor-pointer">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-medium">消防头盔</h3>
+                            <p class="text-sm text-gray-500 mt-0.5">FH-2025A</p>
+                        </div>
+                        <span class="text-xs px-2 py-0.5 bg-green-100 text-green-600 rounded-full">正常</span>
+                    </div>
+                    <div class="flex justify-between mt-2 text-xs text-gray-500">
+                        <span>RFID: 2025070300125</span>
+                        <span>位置: A区-01-02</span>
+                    </div>
+                    <div class="mt-2 pt-2 border-t border-gray-100 flex justify-between items-center">
+                        <div class="flex items-center text-xs text-gray-500">
+                            <span>入库日期: 2025-06-15</span>
+                            <span class="mx-2">|</span>
+                            <span>报废日期: 2030-06-15</span>
+                        </div>
+                        <div class="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center">
+                            <i class="ri-more-line ri-sm text-gray-500"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-3 cursor-pointer">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-medium">氧气呼吸器</h3>
+                            <p class="text-sm text-gray-500 mt-0.5">OBA-350</p>
+                        </div>
+                        <span class="text-xs px-2 py-0.5 bg-yellow-100 text-yellow-600 rounded-full">借出</span>
+                    </div>
+                    <div class="flex justify-between mt-2 text-xs text-gray-500">
+                        <span>RFID: 2025070300126</span>
+                        <span>位置: B区-03-05</span>
+                    </div>
+                    <div class="mt-2 pt-2 border-t border-gray-100 flex justify-between items-center">
+                        <div class="flex items-center text-xs text-gray-500">
+                            <span>借出人: 张伟</span>
+                            <span class="mx-2">|</span>
+                            <span>预计归还: 2025-07-05</span>
+                        </div>
+                        <div class="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center">
+                            <i class="ri-more-line ri-sm text-gray-500"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-3 cursor-pointer">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-medium">热成像仪</h3>
+                            <p class="text-sm text-gray-500 mt-0.5">TIC-8000</p>
+                        </div>
+                        <span class="text-xs px-2 py-0.5 bg-red-100 text-secondary rounded-full">异常</span>
+                    </div>
+                    <div class="flex justify-between mt-2 text-xs text-gray-500">
+                        <span>RFID: 2025070300127</span>
+                        <span>位置: C区-02-01</span>
+                    </div>
+                    <div class="mt-2 pt-2 border-t border-gray-100 flex justify-between items-center">
+                        <div class="flex items-center text-xs text-gray-500">
+                            <span class="text-secondary">异常: 电池故障</span>
+                            <span class="mx-2">|</span>
+                            <span>报告日期: 2025-07-01</span>
+                        </div>
+                        <button class="text-xs text-white bg-secondary px-2 py-1 rounded-button">
+                            处理异常
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-3 cursor-pointer">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-medium">液压破拆工具</h3>
+                            <p class="text-sm text-gray-500 mt-0.5">HRT-2025</p>
+                        </div>
+                        <span class="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">报废</span>
+                    </div>
+                    <div class="flex justify-between mt-2 text-xs text-gray-500">
+                        <span>RFID: 2025070300128</span>
+                        <span>位置: D区-04-03</span>
+                    </div>
+                    <div class="mt-2 pt-2 border-t border-gray-100 flex justify-between items-center">
+                        <div class="flex items-center text-xs text-gray-500">
+                            <span>报废原因: 使用年限已到</span>
+                            <span class="mx-2">|</span>
+                            <span>报废日期: 2025-06-30</span>
+                        </div>
+                        <button class="text-xs text-white bg-gray-500 px-2 py-1 rounded-button">
+                            处理报废
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 开始盘点按钮 -->
+            <div class="fixed bottom-20 right-4 z-40">
+                <button class="w-14 h-14 rounded-full bg-primary text-white shadow-lg flex items-center justify-center">
+                    <i class="ri-scan-2-line ri-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 异常上报页面 -->
+        <div id="page-report" class="page px-4">
+            <!-- 上报表单 -->
+            <div class="bg-white rounded-lg shadow-sm p-4 mt-4">
+                <h2 class="text-base font-medium mb-3">异常上报</h2>
+                
+                <!-- 装备选择 -->
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-600 mb-1">选择装备</label>
+                    <div class="relative">
+                        <select class="w-full h-10 px-3 rounded-button bg-gray-100 text-gray-800 appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20">
+                            <option value="">请选择需要上报的装备</option>
+                            <option value="1">消防头盔 (FH-2025A)</option>
+                            <option value="2">氧气呼吸器 (OBA-350)</option>
+                            <option value="3">热成像仪 (TIC-8000)</option>
+                            <option value="4">液压破拆工具 (HRT-2025)</option>
+                        </select>
+                        <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                            <i class="ri-arrow-down-s-line text-gray-500"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 异常类型 -->
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-600 mb-1">异常类型</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button class="py-2 px-3 bg-primary text-white rounded-button text-sm text-center">设备损坏</button>
+                        <button class="py-2 px-3 bg-gray-100 text-gray-600 rounded-button text-sm text-center">功能异常</button>
+                        <button class="py-2 px-3 bg-gray-100 text-gray-600 rounded-button text-sm text-center">电池故障</button>
+                        <button class="py-2 px-3 bg-gray-100 text-gray-600 rounded-button text-sm text-center">其他问题</button>
+                    </div>
+                </div>
+                
+                <!-- 异常描述 -->
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-600 mb-1">异常描述</label>
+                    <textarea placeholder="请详细描述装备异常情况..." rows="3" class="w-full px-3 py-2 rounded-button bg-gray-100 text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
+                </div>
+                
+                <!-- 图片上传 -->
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-600 mb-2">上传照片</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <div class="aspect-square bg-gray-100 rounded-lg flex items-center justify-center cursor-pointer">
+                            <i class="ri-add-line ri-lg text-gray-400"></i>
+                        </div>
+                        <div class="aspect-square bg-gray-100 rounded-lg relative overflow-hidden">
+                            <img src="https://readdy.ai/api/search-image?query=damaged%20firefighter%20helmet%2C%20close-up%20of%20crack%20or%20damage%2C%20isolated%20on%20light%20background%2C%20inspection%20photo&width=100&height=100&seq=5&orientation=squarish" alt="损坏照片" class="w-full h-full object-cover">
+                            <div class="absolute top-1 right-1 w-5 h-5 bg-black/50 rounded-full flex items-center justify-center cursor-pointer">
+                                <i class="ri-close-line ri-sm text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 提交按钮 -->
+                <button class="w-full py-3 bg-primary text-white rounded-button font-medium">
+                    提交异常报告
+                </button>
+            </div>
+            
+            <!-- 历史上报记录 -->
+            <div class="mt-6">
+                <h2 class="text-base font-medium mb-3">历史上报记录</h2>
+                <div class="space-y-3 pb-4">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-medium">热成像仪</h3>
+                                <p class="text-sm text-gray-500 mt-0.5">TIC-8000</p>
+                            </div>
+                            <span class="text-xs px-2 py-0.5 bg-yellow-100 text-yellow-600 rounded-full">处理中</span>
+                        </div>
+                        <p class="mt-2 text-sm">电池无法充电，使用时间明显缩短，需要更换电池组</p>
+                        <div class="mt-2 flex space-x-2">
+                            <div class="w-16 h-16 bg-gray-100 rounded overflow-hidden">
+                                <img src="https://readdy.ai/api/search-image?query=thermal%20camera%20battery%20compartment%2C%20close-up%20of%20damaged%20or%20worn%20out%20battery%2C%20technical%20inspection%20photo&width=100&height=100&seq=6&orientation=squarish" alt="电池故障" class="w-full h-full object-cover">
+                            </div>
+                        </div>
+                        <div class="mt-2 pt-2 border-t border-gray-100 flex justify-between text-xs text-gray-500">
+                            <span>上报时间: 2025-07-01</span>
+                            <span>工单号: WO2025070100003</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-medium">消防头盔</h3>
+                                <p class="text-sm text-gray-500 mt-0.5">FH-2025A</p>
+                            </div>
+                            <span class="text-xs px-2 py-0.5 bg-green-100 text-green-600 rounded-full">已完成</span>
+                        </div>
+                        <p class="mt-2 text-sm">面罩出现划痕，影响视线清晰度，建议更换面罩</p>
+                        <div class="mt-2 flex space-x-2">
+                            <div class="w-16 h-16 bg-gray-100 rounded overflow-hidden">
+                                <img src="https://readdy.ai/api/search-image?query=firefighter%20helmet%20visor%20with%20scratches%2C%20close-up%20of%20damaged%20face%20shield%2C%20technical%20inspection%20photo&width=100&height=100&seq=7&orientation=squarish" alt="面罩划痕" class="w-full h-full object-cover">
+                            </div>
+                        </div>
+                        <div class="mt-2 pt-2 border-t border-gray-100 flex justify-between text-xs text-gray-500">
+                            <span>上报时间: 2025-06-25</span>
+                            <span>工单号: WO2025062500015</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 个人中心页面 -->
+        <div id="page-profile" class="page">
+            <!-- 用户信息 -->
+            <div class="bg-primary h-40 relative">
+                <div class="absolute left-0 right-0 top-12 flex flex-col items-center">
+                    <div class="w-20 h-20 rounded-full bg-white p-1 shadow-md">
+                        <div class="w-full h-full rounded-full overflow-hidden">
+                            <img src="https://readdy.ai/api/search-image?query=professional%20warehouse%20manager%20portrait%2C%20asian%20male%2C%2035%20years%20old%2C%20wearing%20blue%20uniform%2C%20neutral%20expression%2C%20professional%20headshot&width=200&height=200&seq=8&orientation=squarish" alt="用户头像" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                    <h2 class="text-white font-medium mt-2">刘明 · 仓库管理员</h2>
+                    <p class="text-white/80 text-sm">ID: WH20250001</p>
+                </div>
+            </div>
+            
+            <!-- 数据统计 -->
+            <div class="mt-24 px-4">
+                <div class="bg-white rounded-lg shadow-sm p-4">
+                    <h3 class="text-sm text-gray-500 mb-3">本月工作统计</h3>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="text-center">
+                            <p class="text-xl font-medium text-primary">42</p>
+                            <p class="text-xs text-gray-500 mt-1">入库登记</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xl font-medium text-primary">3</p>
+                            <p class="text-xs text-gray-500 mt-1">盘点次数</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xl font-medium text-primary">8</p>
+                            <p class="text-xs text-gray-500 mt-1">异常处理</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 功能列表 -->
+            <div class="mt-4 px-4">
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <div class="flex items-center p-4 border-b border-gray-100 cursor-pointer">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="ri-history-line text-primary"></i>
+                        </div>
+                        <span class="ml-3 flex-1">操作记录</span>
+                        <i class="ri-arrow-right-s-line text-gray-400"></i>
+                    </div>
+                    <div class="flex items-center p-4 border-b border-gray-100 cursor-pointer">
+                        <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                            <i class="ri-file-list-3-line text-green-600"></i>
+                        </div>
+                        <span class="ml-3 flex-1">工作报表</span>
+                        <i class="ri-arrow-right-s-line text-gray-400"></i>
+                    </div>
+                    <div class="flex items-center p-4 border-b border-gray-100 cursor-pointer">
+                        <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
+                            <i class="ri-notification-4-line text-purple-600"></i>
+                        </div>
+                        <span class="ml-3 flex-1">消息通知</span>
+                        <div class="flex items-center">
+                            <span class="text-xs px-1.5 py-0.5 bg-secondary text-white rounded-full mr-2">3</span>
+                            <i class="ri-arrow-right-s-line text-gray-400"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center p-4 cursor-pointer">
+                        <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                            <i class="ri-settings-3-line text-gray-600"></i>
+                        </div>
+                        <span class="ml-3 flex-1">系统设置</span>
+                        <i class="ri-arrow-right-s-line text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 版本信息 -->
+            <div class="mt-4 px-4 mb-6">
+                <div class="bg-white rounded-lg shadow-sm p-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="font-medium">装备管理系统</h3>
+                            <p class="text-xs text-gray-500 mt-1">版本 2.5.0</p>
+                        </div>
+                        <button class="px-3 py-1 bg-gray-100 text-gray-600 rounded-button text-sm">检查更新</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 退出登录 -->
+            <div class="px-4 mt-6 mb-8">
+                <button class="w-full py-3 border border-gray-200 text-gray-600 rounded-button font-medium">
+                    退出登录
+                </button>
+            </div>
+        </div>
+
+        <!-- RFID绑定弹窗 -->
+        <div id="rfid-modal" class="fixed inset-0 z-50 bg-black/50 items-center justify-center hidden">
+            <div class="bg-white w-[330px] rounded-xl overflow-hidden mx-auto mt-20">
+                <div class="p-4 border-b border-gray-100 flex justify-between items-center">
+                    <h3 class="font-medium">RFID 标签绑定</h3>
+                    <button id="close-rfid-modal" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
+                        <i class="ri-close-line"></i>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <div class="text-center mb-4">
+                        <h4 class="font-medium">消防头盔</h4>
+                        <p class="text-sm text-gray-500">型号：FH-2025A</p>
+                    </div>
+                    
+                    <!-- 扫描区域 -->
+                    <div class="w-full h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center mb-4">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-2">
+                            <i class="ri-scan-2-line ri-lg text-primary"></i>
+                        </div>
+                        <p class="text-sm text-gray-500">请将 RFID 标签靠近扫描区域</p>
+                    </div>
+                    
+                    <!-- 表单 -->
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">RFID 编号</label>
+                            <input type="text" value="2025070300125" class="w-full h-10 px-3 rounded-button bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">生产日期</label>
+                            <input type="date" value="2025-06-15" class="w-full h-10 px-3 rounded-button bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">报废期限</label>
+                            <input type="date" value="2030-06-15" class="w-full h-10 px-3 rounded-button bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">存放位置</label>
+                            <div class="flex space-x-2">
+                                <select class="flex-1 h-10 px-2 rounded-button bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                    <option>A区</option>
+                                    <option>B区</option>
+                                    <option>C区</option>
+                                </select>
+                                <select class="flex-1 h-10 px-2 rounded-button bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                    <option>01</option>
+                                    <option>02</option>
+                                    <option>03</option>
+                                </select>
+                                <select class="flex-1 h-10 px-2 rounded-button bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                    <option>01</option>
+                                    <option>02</option>
+                                    <option>03</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 按钮 -->
+                    <div class="mt-6 flex space-x-3">
+                        <button id="cancel-rfid" class="flex-1 py-2.5 border border-gray-200 text-gray-600 rounded-button">取消</button>
+                        <button id="confirm-rfid" class="flex-1 py-2.5 bg-primary text-white rounded-button">确认绑定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航栏 -->
+        <div class="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-200 grid grid-cols-4 z-40 w-[375px] mx-auto">
+            <div class="tab-item flex flex-col items-center justify-center cursor-pointer active-tab" data-page="warehouse">
+                <i class="ri-inbox-archive-line ri-lg"></i>
+                <span class="text-xs mt-1">入库管理</span>
+            </div>
+            <div class="tab-item flex flex-col items-center justify-center cursor-pointer" data-page="inventory">
+                <i class="ri-file-list-3-line ri-lg"></i>
+                <span class="text-xs mt-1">库房盘点</span>
+            </div>
+            <div class="tab-item flex flex-col items-center justify-center cursor-pointer" data-page="report">
+                <i class="ri-error-warning-line ri-lg"></i>
+                <span class="text-xs mt-1">异常上报</span>
+            </div>
+            <div class="tab-item flex flex-col items-center justify-center cursor-pointer" data-page="profile">
+                <i class="ri-user-3-line ri-lg"></i>
+                <span class="text-xs mt-1">个人中心</span>
+            </div>
+        </div>
+    </div>
+
+    <script id="tab-navigation">
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabItems = document.querySelectorAll('.tab-item');
+            const pages = document.querySelectorAll('.page');
+            const pageTitle = document.getElementById('page-title');
+            
+            const titles = {
+                'warehouse': '入库管理',
+                'inventory': '库房盘点',
+                'report': '异常上报',
+                'profile': '个人中心'
+            };
+            
+            tabItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const pageId = this.getAttribute('data-page');
+                    
+                    // 更新标签栏状态
+                    tabItems.forEach(tab => tab.classList.remove('active-tab'));
+                    this.classList.add('active-tab');
+                    
+                    // 更新页面显示
+                    pages.forEach(page => page.classList.remove('active-page'));
+                    document.getElementById(`page-${pageId}`).classList.add('active-page');
+                    
+                    // 更新标题
+                    pageTitle.textContent = titles[pageId];
+                });
+            });
+        });
+    </script>
+
+    <script id="inventory-chart">
+        document.addEventListener('DOMContentLoaded', function() {
+            const chartDom = document.getElementById('inventory-chart');
+            if (chartDom) {
+                const myChart = echarts.init(chartDom);
+                const option = {
+                    series: [
+                        {
+                            type: 'pie',
+                            radius: ['60%', '80%'],
+                            avoidLabelOverlap: false,
+                            label: {
+                                show: false
+                            },
+                            labelLine: {
+                                show: false
+                            },
+                            emphasis: {
+                                scale: false
+                            },
+                            data: [
+                                { value: 215, name: '已盘', itemStyle: { color: '#10b981' } },
+                                { value: 33, name: '未盘', itemStyle: { color: '#9ca3af' } },
+                                { value: 5, name: '异常', itemStyle: { color: '#dc2626' } }
+                            ]
+                        }
+                    ]
+                };
+                myChart.setOption(option);
+                
+                // 窗口大小变化时重新渲染图表
+                window.addEventListener('resize', function() {
+                    myChart.resize();
+                });
+            }
+        });
+    </script>
+
+    <script id="rfid-binding">
+        document.addEventListener('DOMContentLoaded', function() {
+            const bindButtons = document.querySelectorAll('button:has(i.ri-link-m)');
+            const rfidModal = document.getElementById('rfid-modal');
+            const closeRfidModal = document.getElementById('close-rfid-modal');
+            const cancelRfid = document.getElementById('cancel-rfid');
+            const confirmRfid = document.getElementById('confirm-rfid');
+            
+            // 打开RFID绑定弹窗
+            bindButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    rfidModal.classList.remove('hidden');
+                    rfidModal.classList.add('flex');
+                });
+            });
+            
+            // 关闭RFID绑定弹窗
+            const closeModal = function() {
+                rfidModal.classList.add('hidden');
+                rfidModal.classList.remove('flex');
+            };
+            
+            closeRfidModal.addEventListener('click', closeModal);
+            cancelRfid.addEventListener('click', closeModal);
+            confirmRfid.addEventListener('click', function() {
+                // 这里可以添加绑定成功的逻辑
+                closeModal();
+                
+                // 显示成功提示
+                const successToast = document.createElement('div');
+                successToast.className = 'fixed top-16 left-0 right-0 mx-auto w-[300px] bg-green-600 text-white py-2 px-4 rounded-lg text-center z-50';
+                successToast.textContent = 'RFID 标签绑定成功';
+                document.body.appendChild(successToast);
+                
+                setTimeout(() => {
+                    successToast.remove();
+                }, 2000);
+            });
+        });
+    </script>
+
+    <script id="offline-mode">
+        document.addEventListener('DOMContentLoaded', function() {
+            const offlineBadge = document.getElementById('offline-badge');
+            
+            // 模拟网络状态检测
+            let isOnline = true;
+            
+            // 测试离线模式按钮 (实际应用中应使用网络状态事件)
+            setTimeout(() => {
+                // 模拟网络断开
+                isOnline = false;
+                offlineBadge.style.display = 'block';
+                
+                // 3秒后恢复网络
+                setTimeout(() => {
+                    isOnline = true;
+                    offlineBadge.style.display = 'none';
+                    
+                    // 显示同步成功提示
+                    const syncToast = document.createElement('div');
+                    syncToast.className = 'fixed top-16 left-0 right-0 mx-auto w-[300px] bg-primary text-white py-2 px-4 rounded-lg text-center z-50';
+                    syncToast.textContent = '网络已恢复，数据同步成功';
+                    document.body.appendChild(syncToast);
+                    
+                    setTimeout(() => {
+                        syncToast.remove();
+                    }, 2000);
+                }, 5000);
+            }, 10000);
+            
+            // 实际应用中应使用以下事件
+            /*
+            window.addEventListener('online', function() {
+                isOnline = true;
+                offlineBadge.style.display = 'none';
+                // 执行数据同步
+            });
+            
+            window.addEventListener('offline', function() {
+                isOnline = false;
+                offlineBadge.style.display = 'block';
+            });
+            */
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>装备管理系统APP原型</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <!-- 顶部导航栏 -->
+  <header class="bg-blue-900 text-white p-4 flex items-center justify-between">
+    <h1 class="text-xl font-bold">装备管理系统</h1>
+    <div>
+      <select id="roleSelect" class="bg-blue-800 text-white rounded px-2 py-1">
+        <option value="police">警务人员</option>
+        <option value="warehouse">仓库人员</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- 主体内容区 -->
+  <main class="p-4 max-w-2xl mx-auto">
+    <!-- 警务人员首页 -->
+    <section id="policeHome" class="role-section">
+      <div class="mb-6">
+        <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80" alt="警务人员" class="rounded-lg w-full h-40 object-cover mb-2">
+        <h2 class="text-lg font-semibold mb-2">警务人员功能</h2>
+        <div class="grid grid-cols-2 gap-4">
+          <button onclick="showSection('attendance')" class="bg-blue-700 text-white rounded p-3 font-medium">考勤管理</button>
+          <button onclick="showSection('equipment')" class="bg-blue-700 text-white rounded p-3 font-medium">装备领用</button>
+          <button onclick="showSection('profile')" class="bg-blue-700 text-white rounded p-3 font-medium">个人信息</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 仓库人员首页 -->
+    <section id="warehouseHome" class="role-section hidden">
+      <div class="mb-6">
+        <img src="https://images.unsplash.com/photo-1515168833906-d2a3b82b302b?auto=format&fit=crop&w=800&q=80" alt="仓库人员" class="rounded-lg w-full h-40 object-cover mb-2">
+        <h2 class="text-lg font-semibold mb-2">仓库人员功能</h2>
+        <div class="grid grid-cols-2 gap-4">
+          <button onclick="showSection('storage')" class="bg-green-700 text-white rounded p-3 font-medium">入库管理</button>
+          <button onclick="showSection('inventory')" class="bg-green-700 text-white rounded p-3 font-medium">库房盘点</button>
+          <button onclick="showSection('report')" class="bg-green-700 text-white rounded p-3 font-medium">异常上报</button>
+          <button onclick="showSection('offline')" class="bg-green-700 text-white rounded p-3 font-medium">离线模式</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 警务人员-考勤管理 -->
+    <section id="attendance" class="feature-section hidden">
+      <button onclick="backToHome()" class="mb-4 text-blue-700">← 返回</button>
+      <h3 class="text-lg font-bold mb-2">考勤管理</h3>
+      <div class="space-y-4">
+        <!-- 补卡申请 -->
+        <div class="bg-white rounded shadow p-4">
+          <h4 class="font-semibold mb-2">补卡申请</h4>
+          <form class="space-y-2">
+            <label class="block">缺勤日期：<input type="date" class="border rounded px-2 py-1 w-full"></label>
+            <label class="block">补签原因：<input type="text" class="border rounded px-2 py-1 w-full" placeholder="请输入原因"></label>
+            <button type="button" class="bg-blue-600 text-white rounded px-4 py-2 mt-2">提交申请</button>
+          </form>
+        </div>
+        <!-- 考勤记录 -->
+        <div class="bg-white rounded shadow p-4">
+          <h4 class="font-semibold mb-2">考勤记录</h4>
+          <ul class="divide-y">
+            <li class="py-2 flex justify-between"><span>2024-06-01</span><span class="text-green-600">正常</span></li>
+            <li class="py-2 flex justify-between"><span>2024-06-02</span><span class="text-red-600">缺勤</span></li>
+            <li class="py-2 flex justify-between"><span>2024-06-03</span><span class="text-green-600">正常</span></li>
+          </ul>
+        </div>
+        <!-- 排班记录 -->
+        <div class="bg-white rounded shadow p-4">
+          <h4 class="font-semibold mb-2">排班记录</h4>
+          <ul class="divide-y">
+            <li class="py-2 flex justify-between"><span>2024-06-01</span><span>白班</span></li>
+            <li class="py-2 flex justify-between"><span>2024-06-02</span><span>夜班</span></li>
+            <li class="py-2 flex justify-between"><span>2024-06-03</span><span>白班</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 警务人员-装备领用 -->
+    <section id="equipment" class="feature-section hidden">
+      <button onclick="backToHome()" class="mb-4 text-blue-700">← 返回</button>
+      <h3 class="text-lg font-bold mb-2">装备领用</h3>
+      <div class="space-y-4">
+        <!-- 领用申请 -->
+        <div class="bg-white rounded shadow p-4">
+          <h4 class="font-semibold mb-2">领用申请</h4>
+          <form class="space-y-2">
+            <label class="block">装备类型：
+              <select class="border rounded px-2 py-1 w-full">
+                <option>防弹衣</option>
+                <option>对讲机</option>
+                <option>手铐</option>
+                <option>警棍</option>
+              </select>
+            </label>
+            <label class="block">数量：<input type="number" min="1" class="border rounded px-2 py-1 w-full"></label>
+            <label class="block">用途：<input type="text" class="border rounded px-2 py-1 w-full" placeholder="请输入用途"></label>
+            <button type="button" class="bg-blue-600 text-white rounded px-4 py-2 mt-2">提交申请</button>
+          </form>
+        </div>
+        <!-- 查看申请 -->
+        <div class="bg-white rounded shadow p-4">
+          <h4 class="font-semibold mb-2">申请审批状态</h4>
+          <ul class="divide-y">
+            <li class="py-2 flex justify-between"><span>防弹衣 x1</span><span class="text-yellow-600">审批中</span></li>
+            <li class="py-2 flex justify-between"><span>对讲机 x2</span><span class="text-green-600">已通过</span></li>
+          </ul>
+        </div>
+        <!-- 领用记录 -->
+        <div class="bg-white rounded shadow p-4">
+          <h4 class="font-semibold mb-2">领用记录</h4>
+          <ul class="divide-y">
+            <li class="py-2 flex justify-between"><span>2024-05-30 防弹衣 x1</span><span>已归还</span></li>
+            <li class="py-2 flex justify-between"><span>2024-06-01 对讲机 x2</span><span>在用</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 警务人员-个人信息 -->
+    <section id="profile" class="feature-section hidden">
+      <button onclick="backToHome()" class="mb-4 text-blue-700">← 返回</button>
+      <h3 class="text-lg font-bold mb-2">个人信息</h3>
+      <div class="space-y-4">
+        <!-- 档案信息 -->
+        <div class="bg-white rounded shadow p-4">
+          <h4 class="font-semibold mb-2">档案信息</h4>
+          <div class="flex items-center space-x-4 mb-2">
+            <img src="https://images.unsplash.com/photo-1511367461989-f85a21fda167?auto=format&fit=crop&w=80&q=80" alt="头像" class="w-16 h-16 rounded-full object-cover">
+            <div>
+              <div>姓名：张三</div>
+              <div>警号：110001</div>
+              <div>部门：巡逻队</div>
+            </div>
+          </div>
+          <div>技能标签：<span class="bg-blue-200 text-blue-800 rounded px-2 py-1 text-xs">射击</span> <span class="bg-blue-200 text-blue-800 rounded px-2 py-1 text-xs">驾驶</span></div>
+        </div>
+        <!-- 信息信息 -->
+        <div class="bg-white rounded shadow p-4">
+          <h4 class="font-semibold mb-2">个性化信息</h4>
+          <form class="space-y-2">
+            <label class="block">登录密码：<input type="password" class="border rounded px-2 py-1 w-full" value="123456"></label>
+            <button type="button" class="bg-blue-600 text-white rounded px-4 py-2 mt-2">修改密码</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- 仓库人员-入库管理 -->
+    <section id="storage" class="feature-section hidden">
+      <button onclick="backToHome()" class="mb-4 text-green-700">← 返回</button>
+      <h3 class="text-lg font-bold mb-2">入库管理</h3>
+      <div class="bg-white rounded shadow p-4 space-y-4">
+        <form class="space-y-2">
+          <label class="block">装备产品：
+            <select class="border rounded px-2 py-1 w-full">
+              <option>防弹衣</option>
+              <option>对讲机</option>
+              <option>手铐</option>
+              <option>警棍</option>
+            </select>
+          </label>
+          <label class="block">RFID电子标签：<input type="text" class="border rounded px-2 py-1 w-full" placeholder="扫描或输入标签"></label>
+          <label class="block">生产日期：<input type="date" class="border rounded px-2 py-1 w-full"></label>
+          <label class="block">报废期限：<input type="date" class="border rounded px-2 py-1 w-full"></label>
+          <label class="block">技术参数：<input type="text" class="border rounded px-2 py-1 w-full" placeholder="如：防护等级"></label>
+          <button type="button" class="bg-green-600 text-white rounded px-4 py-2 mt-2">入库登记</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 仓库人员-库房盘点 -->
+    <section id="inventory" class="feature-section hidden">
+      <button onclick="backToHome()" class="mb-4 text-green-700">← 返回</button>
+      <h3 class="text-lg font-bold mb-2">库房盘点</h3>
+      <div class="bg-white rounded shadow p-4">
+        <ul class="divide-y">
+          <li class="py-2 flex justify-between"><span>防弹衣 x10</span><span class="text-green-600">在库</span></li>
+          <li class="py-2 flex justify-between"><span>对讲机 x5</span><span class="text-yellow-600">借出</span></li>
+          <li class="py-2 flex justify-between"><span>手铐 x2</span><span class="text-red-600">损坏</span></li>
+          <li class="py-2 flex justify-between"><span>警棍 x1</span><span class="text-gray-600">报废</span></li>
+        </ul>
+        <button class="bg-green-600 text-white rounded px-4 py-2 mt-4">同步后台数据</button>
+      </div>
+    </section>
+
+    <!-- 仓库人员-异常上报 -->
+    <section id="report" class="feature-section hidden">
+      <button onclick="backToHome()" class="mb-4 text-green-700">← 返回</button>
+      <h3 class="text-lg font-bold mb-2">异常上报</h3>
+      <div class="bg-white rounded shadow p-4">
+        <form class="space-y-2">
+          <label class="block">装备类型：
+            <select class="border rounded px-2 py-1 w-full">
+              <option>防弹衣</option>
+              <option>对讲机</option>
+              <option>手铐</option>
+              <option>警棍</option>
+            </select>
+          </label>
+          <label class="block">故障描述：<input type="text" class="border rounded px-2 py-1 w-full" placeholder="请输入故障描述"></label>
+          <label class="block">上传照片：<input type="file" class="border rounded px-2 py-1 w-full"></label>
+          <button type="button" class="bg-green-600 text-white rounded px-4 py-2 mt-2">提交上报</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 仓库人员-离线模式 -->
+    <section id="offline" class="feature-section hidden">
+      <button onclick="backToHome()" class="mb-4 text-green-700">← 返回</button>
+      <h3 class="text-lg font-bold mb-2">离线模式</h3>
+      <div class="bg-white rounded shadow p-4">
+        <p class="mb-2">当前为离线模式，所有操作将本地缓存，恢复网络后自动同步。</p>
+        <ul class="list-disc pl-5 text-gray-700">
+          <li>可进行入库、盘点、异常上报等操作</li>
+          <li>数据安全本地存储，联网后自动上传</li>
+        </ul>
+        <button class="bg-green-600 text-white rounded px-4 py-2 mt-4">手动同步</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- 底部说明 -->
+  <footer class="text-center text-gray-500 text-xs py-4">
+    &copy; 2024 装备管理系统原型 - 由AI产品经理&设计师生成
+  </footer>
+
+  <!-- 页面切换脚本 -->
+  <script>
+    const roleSelect = document.getElementById('roleSelect');
+    const policeHome = document.getElementById('policeHome');
+    const warehouseHome = document.getElementById('warehouseHome');
+    const featureSections = document.querySelectorAll('.feature-section');
+    function showSection(sectionId) {
+      policeHome.classList.add('hidden');
+      warehouseHome.classList.add('hidden');
+      featureSections.forEach(s => s.classList.add('hidden'));
+      document.getElementById(sectionId).classList.remove('hidden');
+    }
+    function backToHome() {
+      featureSections.forEach(s => s.classList.add('hidden'));
+      if (roleSelect.value === 'police') {
+        policeHome.classList.remove('hidden');
+      } else {
+        warehouseHome.classList.remove('hidden');
+      }
+    }
+    roleSelect.addEventListener('change', function() {
+      featureSections.forEach(s => s.classList.add('hidden'));
+      if (this.value === 'police') {
+        policeHome.classList.remove('hidden');
+        warehouseHome.classList.add('hidden');
+      } else {
+        warehouseHome.classList.remove('hidden');
+        policeHome.classList.add('hidden');
+      }
+    });
+    // 默认显示警务人员首页
+    backToHome();
+  </script>
+</body>
+</html>
